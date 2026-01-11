@@ -18,9 +18,9 @@ export async function POST(request: NextRequest) {
     const { slug, all } = body;
 
     if (all) {
-      const result = updateAllArticlesLinks();
+      const result = await updateAllArticlesLinks();
       
-      const articlesDb = loadArticles();
+      const articlesDb = await loadArticles();
       articlesDb.articles.forEach(article => {
         revalidatePath(`/articles/${article.slug}`);
       });
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const success = updateArticleLinks(slug);
+    const success = await updateArticleLinks(slug);
 
     if (!success) {
       return NextResponse.json(

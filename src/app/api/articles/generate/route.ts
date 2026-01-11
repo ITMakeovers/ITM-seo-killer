@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
     
     if (count) {
-      const pendingTopics = getPendingTopics(count);
+      const pendingTopics = await getPendingTopics(count);
       const slugs = pendingTopics.map(t => t.slug);
       const result = await generateMultipleArticles(slugs);
       

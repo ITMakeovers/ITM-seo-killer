@@ -23,6 +23,8 @@ Create `.env` file:
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
 UNSPLASH_ACCESS_KEY=your_unsplash_key_here
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DB=seo-killer
 ```
 
 Install and run:
@@ -32,6 +34,18 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
+
+### MongoDB Setup
+
+The application uses MongoDB for data storage. You can use either:
+
+1. **Local MongoDB**: Install and run MongoDB locally
+2. **MongoDB Atlas**: Use the free tier at [mongodb.com/atlas](https://www.mongodb.com/atlas)
+
+Set your `MONGODB_URI` in the `.env` file. For MongoDB Atlas, it will look like:
+```
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
+```
 
 ## Build
 

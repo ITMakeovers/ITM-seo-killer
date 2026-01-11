@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    updateTopicStatus(topicId, 'pending');
+    await updateTopicStatus(topicId, 'pending');
 
     return NextResponse.json({
       success: true,

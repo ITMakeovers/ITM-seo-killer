@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const article = getArticleBySlug(slug);
+    const article = await getArticleBySlug(slug);
 
     if (!article) {
       return NextResponse.json(

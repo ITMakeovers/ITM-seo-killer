@@ -13,9 +13,9 @@ export const metadata: Metadata = {
 
 export const revalidate = 300;
 
-export default function ArticlesPage() {
+export default async function ArticlesPage() {
   const config = getSiteConfig();
-  const articlesDb = loadArticles();
+  const articlesDb = await loadArticles();
   const articles = articlesDb.articles.filter(
     (a) => a.status === 'generated' || a.status === 'published'
   );

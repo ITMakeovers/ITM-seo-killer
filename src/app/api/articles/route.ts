@@ -3,8 +3,10 @@ import { loadArticles, getArticleStats } from '@/lib/articles';
 
 export async function GET() {
   try {
-    const database = loadArticles();
-    const stats = getArticleStats();
+    const [database, stats] = await Promise.all([
+      loadArticles(),
+      getArticleStats()
+    ]);
 
     return NextResponse.json({
       success: true,

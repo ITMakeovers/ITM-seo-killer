@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next';
 import { loadArticles } from '@/lib/articles';
 import { getSiteUrl, getSiteConfig } from '@/lib/config';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const config = getSiteConfig();
-  const articlesDb = loadArticles();
+  const articlesDb = await loadArticles();
   const articles = articlesDb.articles.filter(
     a => a.status === 'generated' || a.status === 'published'
   );

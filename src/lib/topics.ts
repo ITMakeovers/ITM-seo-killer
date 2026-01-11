@@ -1,45 +1,30 @@
-import fs from 'fs';
-import path from 'path';
 import { Topic, TopicsDatabase } from '@/types/article';
 import { generateUniqueSlug, generateId } from './slug';
+import { getDatabase } from './mongodb';
 
-const TOPICS_DIR = path.join(process.cwd(), 'data', 'topics');
-const TOPICS_FILE = path.join(TOPICS_DIR, 'topics.json');
+const COLLECTION_NAME = 'topics';
 
-export function ensureTopicsDir(): void {
-  if (!fs.existsSync(TOPICS_DIR)) {
-    fs.mkdirSync(TOPICS_DIR, { recursive: true });
-  }
-}
-
-export function loadTopics(): TopicsDatabase {
-  ensureTopicsDir();
+export async function loadTopics(): Promise<TopicsDatabase> {
+  const db = await getDatabase();
+  const collection = db.collection<Topic>(COLLECTION_NAME);
   
-  if (!fs.existsSync(TOPICS_FILE)) {
-    const emptyDb: TopicsDatabase = {
-      topics: [],
-      lastUpdated: new Date().toISOString(),
-      totalCount: 0
-    };
-    saveTopics(emptyDb);
-    return emptyDb;
-  }
+  const topics = await collection.find({}).toArray();
   
-  const data = fs.readFileSync(TOPICS_FILE, 'utf-8');
-  return JSON.parse(data) as TopicsDatabase;
+  return {
+    topics,
+    lastUpdated: new Date().toISOString(),
+    totalCount: topics.length
+  };
 }
 
-export function saveTopics(database: TopicsDatabase): void {
-  ensureTopicsDir();
-  database.lastUpdated = new Date().toISOString();
-  database.totalCount = database.topics.length;
-  fs.writeFileSync(TOPICS_FILE, JSON.stringify(database, null, 2), 'utf-8');
-}
-
-export function addTopics(newTopics: Omit<Topic, 'id' | 'slug' | 'createdAt'>[]): Topic[] {
-  const db = loadTopics();
-  const existingSlugs = db.topics.map(t => t.slug);
-  const existingTitles = new Set(db.topics.map(t => t.title.toLowerCase()));
+export async function addTopics(newTopics: Omit<Topic, 'id' | 'slug' | 'createdAt'>[]): Promise<Topic[]> {
+  const db = await getDatabase();
+  const collection = db.collection<Topic>(COLLECTION_NAME);
+  
+  // Get existing topics to check for duplicates
+  const existingTopics = await collection.find({}).toArray();
+  const existingSlugs = existingTopics.map(t => t.slug);
+  const existingTitles = new Set(existingTopics.map(t => t.title.toLowerCase()));
   
   const topicsToAdd: Topic[] = [];
   
@@ -65,73 +50,124 @@ export function addTopics(newTopics: Omit<Topic, 'id' | 'slug' | 'createdAt'>[])
     existingTitles.add(normalizedTitle);
   }
   
-  db.topics.push(...topicsToAdd);
-  saveTopics(db);
+  if (topicsToAdd.length > 0) {
+    await collection.insertMany(topicsToAdd);
+  }
   
   return topicsToAdd;
 }
 
-export function getTopicBySlug(slug: string): Topic | null {
-  const db = loadTopics();
-  return db.topics.find(t => t.slug === slug) || null;
-}
-
-export function updateTopicStatus(id: string, status: Topic['status'], error?: string): void {
-  const db = loadTopics();
-  const topic = db.topics.find(t => t.id === id);
+export async function getTopicBySlug(slug: string): Promise<Topic | null> {
+  const db = await getDatabase();
+  const collection = db.collection<Topic>(COLLECTION_NAME);
   
-  if (topic) {
-    topic.status = status;
-    if (error) {
-      topic.error = error;
-    } else {
-      delete topic.error;
-    }
-    if (status === 'generated') {
-      topic.generatedAt = new Date().toISOString();
-    } else if (status === 'pending') {
-      delete topic.generatedAt;
-    }
-    saveTopics(db);
-  }
+  return await collection.findOne({ slug });
 }
 
-export function updateTopicStatusBySlug(slug: string, status: Topic['status'], error?: string): void {
-  const db = loadTopics();
-  const topic = db.topics.find(t => t.slug === slug);
+export async function updateTopicStatus(id: string, status: Topic['status'], error?: string): Promise<void> {
+  const db = await getDatabase();
+  const collection = db.collection<Topic>(COLLECTION_NAME);
   
-  if (topic) {
-    topic.status = status;
-    if (error) {
-      topic.error = error;
-    } else {
-      delete topic.error;
-    }
-    if (status === 'generated') {
-      topic.generatedAt = new Date().toISOString();
-    } else if (status === 'pending') {
-      delete topic.generatedAt;
-    }
-    saveTopics(db);
+  const updateData: Partial<Topic> = { status };
+  
+  if (error) {
+    updateData.error = error;
+  } else {
+    // MongoDB $unset to remove field
+    await collection.updateOne(
+      { id },
+      { 
+        $set: { status },
+        $unset: { error: '' }
+      }
+    );
+    return;
   }
+  
+  if (status === 'generated') {
+    updateData.generatedAt = new Date().toISOString();
+  } else if (status === 'pending') {
+    await collection.updateOne(
+      { id },
+      { 
+        $set: { status },
+        $unset: { generatedAt: '', error: '' }
+      }
+    );
+    return;
+  }
+  
+  await collection.updateOne(
+    { id },
+    { $set: updateData }
+  );
 }
 
-export function getPendingTopics(limit?: number): Topic[] {
-  const db = loadTopics();
-  const pending = db.topics.filter(t => t.status === 'pending');
-  return limit ? pending.slice(0, limit) : pending;
+export async function updateTopicStatusBySlug(slug: string, status: Topic['status'], error?: string): Promise<void> {
+  const db = await getDatabase();
+  const collection = db.collection<Topic>(COLLECTION_NAME);
+  
+  const updateData: Partial<Topic> = { status };
+  
+  if (error) {
+    updateData.error = error;
+  } else {
+    await collection.updateOne(
+      { slug },
+      { 
+        $set: { status },
+        $unset: { error: '' }
+      }
+    );
+    return;
+  }
+  
+  if (status === 'generated') {
+    updateData.generatedAt = new Date().toISOString();
+  } else if (status === 'pending') {
+    await collection.updateOne(
+      { slug },
+      { 
+        $set: { status },
+        $unset: { generatedAt: '', error: '' }
+      }
+    );
+    return;
+  }
+  
+  await collection.updateOne(
+    { slug },
+    { $set: updateData }
+  );
 }
 
-export function getTopicStats() {
-  const db = loadTopics();
-  return {
-    total: db.topics.length,
-    pending: db.topics.filter(t => t.status === 'pending').length,
-    generating: db.topics.filter(t => t.status === 'generating').length,
-    generated: db.topics.filter(t => t.status === 'generated').length,
-    published: db.topics.filter(t => t.status === 'published').length,
-    error: db.topics.filter(t => t.status === 'error').length
-  };
+export async function getPendingTopics(limit?: number): Promise<Topic[]> {
+  const db = await getDatabase();
+  const collection = db.collection<Topic>(COLLECTION_NAME);
+  
+  const query = collection.find({ status: 'pending' });
+  
+  if (limit) {
+    query.limit(limit);
+  }
+  
+  return await query.toArray();
+}
+
+export async function getTopicStats() {
+  const db = await getDatabase();
+  const collection = db.collection<Topic>(COLLECTION_NAME);
+  
+  const [total, pending, generating, generated, published, error] = await Promise.all([
+    collection.countDocuments({}),
+    collection.countDocuments({ status: 'pending' }),
+    collection.countDocuments({ status: 'generating' }),
+    collection.countDocuments({ status: 'generated' }),
+    collection.countDocuments({ status: 'published' }),
+    collection.countDocuments({ status: 'error' })
+  ]);
+  
+  return { total, pending, generating, generated, published, error };
 }
 
 

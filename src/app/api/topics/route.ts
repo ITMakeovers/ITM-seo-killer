@@ -3,8 +3,10 @@ import { loadTopics, getTopicStats } from '@/lib/topics';
 
 export async function GET() {
   try {
-    const database = loadTopics();
-    const stats = getTopicStats();
+    const [database, stats] = await Promise.all([
+      loadTopics(),
+      getTopicStats()
+    ]);
 
     return NextResponse.json({
       success: true,
