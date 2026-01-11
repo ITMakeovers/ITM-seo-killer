@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { generateArticleFromTopic, generateMultipleArticles } from '@/lib/article-generator';
 import { getPendingTopics } from '@/lib/topics';
+import { isAuthenticated } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
+  // Check authentication
+  if (!isAuthenticated(request)) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized. Please provide valid authentication.' },
+      { status: 401 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { topicSlug, topicSlugs, count } = body;

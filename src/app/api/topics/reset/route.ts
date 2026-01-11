@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateTopicStatus } from '@/lib/topics';
+import { isAuthenticated } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
+  // Check authentication
+  if (!isAuthenticated(request)) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized. Please provide valid authentication.' },
+      { status: 401 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { topicId } = body;

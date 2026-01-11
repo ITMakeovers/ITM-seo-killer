@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { updateArticleLinks, updateAllArticlesLinks } from '@/lib/linking';
 import { loadArticles } from '@/lib/articles';
+import { isAuthenticated } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
+  // Check authentication
+  if (!isAuthenticated(request)) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized. Please provide valid authentication.' },
+      { status: 401 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { slug, all } = body;
