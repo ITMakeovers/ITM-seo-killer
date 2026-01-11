@@ -37,7 +37,7 @@ export async function generateTopicsFromSeeds(
         status: 'pending' as const
       }));
 
-      const addedTopics = addTopics(topicsToAdd);
+      const addedTopics = await addTopics(topicsToAdd);
       result.topics.push(...addedTopics);
       result.generated += addedTopics.length;
 
@@ -83,7 +83,7 @@ export async function generateTopicsForKeyword(
       status: 'pending' as const
     }));
 
-    const addedTopics = addTopics(topicsToAdd);
+    const addedTopics = await addTopics(topicsToAdd);
     result.topics = addedTopics;
     result.generated = addedTopics.length;
   } catch (error) {

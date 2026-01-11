@@ -1,6 +1,7 @@
 import { Article, InternalLink, ExternalLink } from '@/types/article';
-import { loadArticles, saveArticles } from './articles';
+import { loadArticles } from './articles';
 import { getSiteConfig, getRandomItem } from './config';
+import { getDatabase } from './mongodb';
 
 export function findRelatedArticles(
   currentArticle: Article,
@@ -62,20 +63,22 @@ export function generateExternalLinks(count: number): ExternalLink[] {
   return links;
 }
 
-export function updateArticleLinks(articleSlug: string): boolean {
-  const db = loadArticles();
-  const articleIndex = db.articles.findIndex(a => a.slug === articleSlug);
+export async function updateArticleLinks(articleSlug: string): Promise<boolean> {
+  const db = await getDatabase();
+  const collection = db.collection<Article>('articles');
   
-  if (articleIndex === -1) {
+  const currentArticle = await collection.findOne({ slug: articleSlug });
+  
+  if (!currentArticle) {
     return false;
   }
   
-  const currentArticle = db.articles[articleIndex];
+  const allArticles = await collection.find({}).toArray();
   const config = getSiteConfig();
   
   const maxInternalLinks = Math.min(
     config.content.maxInternalLinks,
-    db.articles.length - 1
+    allArticles.length - 1
   );
   
   const minInternalLinks = Math.min(
@@ -89,7 +92,7 @@ export function updateArticleLinks(articleSlug: string): boolean {
   
   const relatedArticles = findRelatedArticles(
     currentArticle,
-    db.articles,
+    allArticles,
     targetLinkCount
   );
   
@@ -99,26 +102,34 @@ export function updateArticleLinks(articleSlug: string): boolean {
     config.externalLinks.maxExternalLinksPerArticle
   );
   
-  db.articles[articleIndex].internalLinks = internalLinks;
-  db.articles[articleIndex].externalLinks = externalLinks;
-  db.articles[articleIndex].updatedAt = new Date().toISOString();
+  await collection.updateOne(
+    { slug: articleSlug },
+    {
+      $set: {
+        internalLinks,
+        externalLinks,
+        updatedAt: new Date().toISOString()
+      }
+    }
+  );
   
-  saveArticles(db);
   return true;
 }
 
-export function updateAllArticlesLinks(): { updated: number; failed: number } {
-  const db = loadArticles();
+export async function updateAllArticlesLinks(): Promise<{ updated: number; failed: number }> {
+  const db = await getDatabase();
+  const collection = db.collection<Article>('articles');
+  
   let updated = 0;
   let failed = 0;
   
-  const publishedArticles = db.articles.filter(
-    a => a.status === 'generated' || a.status === 'published'
-  );
+  const publishedArticles = await collection.find({
+    status: { $in: ['generated', 'published'] }
+  }).toArray();
   
   for (const article of publishedArticles) {
     try {
-      const success = updateArticleLinks(article.slug);
+      const success = await updateArticleLinks(article.slug);
       if (success) {
         updated++;
       } else {

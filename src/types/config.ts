@@ -57,6 +57,8 @@ export interface GenerationConfig {
 
 export interface AdminConfig {
   enabled: boolean;
+  pinHash?: string;
+  apiKey?: string;
 }
 
 export interface SiteConfig {

@@ -6,6 +6,114 @@ import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
+function AdminLogin({ onLogin }: { onLogin: () => void }) {
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        onLogin();
+      } else {
+        setError('Nieprawidłowy PIN');
+      }
+    } catch {
+      setError('Błąd podczas weryfikacji');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen relative flex items-center justify-center py-8">
+      <div className="hero-glow -top-32 right-1/4 opacity-30" />
+      <div className="hero-glow top-1/2 -left-64 opacity-20" />
+      
+      <div className="relative w-full max-w-md mx-auto px-4">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-8 shadow-2xl">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center">
+              <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-display text-gradient mb-2">Panel administracyjny</h1>
+            <p className="text-[var(--text-muted)] text-sm">Wprowadź PIN aby kontynuować</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="pin" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                PIN
+              </label>
+              <input
+                id="pin"
+                type="password"
+                value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                placeholder="Wprowadź PIN"
+                className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent transition-all duration-200"
+                autoFocus
+                disabled={loading}
+              />
+            </div>
+
+            {error && (
+              <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm flex items-center gap-2">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading || !pin}
+              className="w-full bg-gradient-to-r from-sky-600 to-sky-500 text-white px-5 py-3 rounded-xl text-sm font-semibold hover:from-sky-500 hover:to-sky-400 disabled:from-neutral-700 disabled:to-neutral-600 disabled:text-neutral-400 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-sky-500/20 hover:shadow-sky-500/30"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Weryfikacja...
+                </span>
+              ) : 'Zaloguj'}
+            </button>
+          </form>
+
+          <div className="mt-6 pt-6 border-t border-[var(--border-subtle)]">
+            <Link
+              href="/"
+              className="flex items-center justify-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--accent-secondary)] transition-colors duration-200"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Powrót do strony głównej
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface Topic {
   id: string;
   title: string;
@@ -37,6 +145,7 @@ interface TopicStats {
 }
 
 export default function AdminPage() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [stats, setStats] = useState<TopicStats | null>(null);
@@ -71,9 +180,49 @@ export default function AdminPage() {
     }
   };
 
+  // Check authentication status on mount
   useEffect(() => {
-    loadTopics();
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/status');
+        const data = await response.json();
+        if (data.authenticated) {
+          setIsAuthenticated(true);
+        }
+      } catch {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
   }, []);
+
+  // Load topics when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadTopics();
+    }
+  }, [isAuthenticated]);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+    loadTopics();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      setIsAuthenticated(false);
+      setTopics([]);
+      setArticles([]);
+      setStats(null);
+    } catch {
+      setMessage('Błąd podczas wylogowania');
+    }
+  };
+
+  if (!isAuthenticated) {
+    return <AdminLogin onLogin={handleLogin} />;
+  }
 
   const handleGenerateTopics = async () => {
     setGenerating(true);
@@ -259,17 +408,30 @@ export default function AdminPage() {
               <h1 className="text-3xl font-display text-gradient mb-2">Panel administracyjny</h1>
               <p className="text-[var(--text-muted)] text-sm">Zarządzanie tematami i artykułami</p>
             </div>
-            <Link
-              href="/"
-              className="group flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--accent-secondary)] transition-all duration-300"
-            >
-              <div className="w-8 h-8 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] flex items-center justify-center group-hover:border-[var(--accent-primary)] transition-all duration-300">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </div>
-              <span className="font-medium">Strona główna</span>
-            </Link>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleLogout}
+                className="group flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-rose-400 transition-all duration-300"
+              >
+                <div className="w-8 h-8 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] flex items-center justify-center group-hover:border-rose-500 transition-all duration-300">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </div>
+                <span className="font-medium">Wyloguj</span>
+              </button>
+              <Link
+                href="/"
+                className="group flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--accent-secondary)] transition-all duration-300"
+              >
+                <div className="w-8 h-8 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] flex items-center justify-center group-hover:border-[var(--accent-primary)] transition-all duration-300">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                </div>
+                <span className="font-medium">Strona główna</span>
+              </Link>
+            </div>
           </div>
         </header>
 

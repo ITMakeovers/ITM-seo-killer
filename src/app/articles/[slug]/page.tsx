@@ -14,7 +14,7 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  const articlesDb = loadArticles();
+  const articlesDb = await loadArticles();
   const publishedArticles = articlesDb.articles.filter(
     (a) => a.status === 'generated' || a.status === 'published'
   );
@@ -26,7 +26,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await getArticleBySlug(slug);
 
   if (!article) {
     return {
@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ArticlePage({ params }: PageProps) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await getArticleBySlug(slug);
 
   if (!article) {
     notFound();

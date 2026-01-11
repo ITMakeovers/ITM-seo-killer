@@ -23,6 +23,8 @@ Create `.env` file:
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
 UNSPLASH_ACCESS_KEY=your_unsplash_key_here
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DB=seo-killer
 ```
 
 Install and run:
@@ -32,6 +34,18 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
+
+### MongoDB Setup
+
+The application uses MongoDB for data storage. You can use either:
+
+1. **Local MongoDB**: Install and run MongoDB locally
+2. **MongoDB Atlas**: Use the free tier at [mongodb.com/atlas](https://www.mongodb.com/atlas)
+
+Set your `MONGODB_URI` in the `.env` file. For MongoDB Atlas, it will look like:
+```
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
+```
 
 ## Build
 
@@ -55,26 +69,56 @@ Edit `site.config.json` to customize your portal:
     "list": "grid"
   },
   "admin": {
-    "enabled": true
+    "enabled": true,
+    "pinHash": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
+    "apiKey": "CHANGE-ME-BEFORE-DEPLOYMENT"
   }
 }
 ```
+
+### Security Configuration
+
+The admin panel is protected by PIN authentication and API key protection:
+
+- **PIN Protection**: The admin interface requires a PIN to access. The default PIN is `1234` (hash: `03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4`)
+- **API Key Protection**: External API requests require an API key in the `x-api-key` header. The default is `CHANGE-ME-BEFORE-DEPLOYMENT`
+
+To change the PIN:
+1. Generate a SHA-256 hash of your desired PIN:
+   ```bash
+   echo -n "your-pin" | shasum -a 256
+   ```
+2. Update the `admin.pinHash` in `site.config.json`
+
+To set an API key:
+1. Generate a secure random key or use your own
+2. Update the `admin.apiKey` in `site.config.json`
+3. Include the key in the `x-api-key` header when making external API requests
+
+**Note**: For production, always use strong PINs and API keys, and never commit them to version control. Consider using environment variables instead.
 
 ## Workflow
 
 ### 1. Generate Content
 - Enable admin panel in `site.config.json`
-- Visit `/admin` and generate topics
+- Configure PIN and API key for security
+- Visit `/admin` and log in with your PIN (default: `1234`)
+- Generate topics from seed keywords
 - Generate articles from topics
 - Create internal links between articles
 
 ### 2. Deploy
-- Disable admin panel for production
+- Change the default PIN to a secure one
+- Update the API key to a strong random value
+- Consider moving sensitive config to environment variables
+- Optionally disable admin panel for production (or keep it secured)
 - Push to GitHub
 - Deploy to Vercel
 
 ### 3. Result
 - SEO-optimized portal with AI-generated content
+- Secured admin interface with PIN protection
+- API protected against unauthorized external access
 - Automatic sitemaps and meta tags
 - Fast loading with edge caching
 

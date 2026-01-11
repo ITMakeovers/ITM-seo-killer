@@ -28,7 +28,7 @@ export default async function TagPage({ params }: PageProps) {
   const decodedTag = decodeURIComponent(tag);
   
   const config = getSiteConfig();
-  const articlesDb = loadArticles();
+  const articlesDb = await loadArticles();
   
   const articles = articlesDb.articles.filter(
     (article) =>

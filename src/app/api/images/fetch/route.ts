@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getImageForArticle } from '@/lib/images';
-import { getArticleBySlug, loadArticles, saveArticles } from '@/lib/articles';
+import { getArticleBySlug } from '@/lib/articles';
+import { getDatabase } from '@/lib/mongodb';
+import { Article } from '@/types/article';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +16,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const article = getArticleBySlug(slug);
+    const article = await getArticleBySlug(slug);
 
     if (!article) {
       return NextResponse.json(
@@ -28,14 +30,18 @@ export async function POST(request: NextRequest) {
       article.meta.keywords
     );
 
-    const db = loadArticles();
-    const articleIndex = db.articles.findIndex(a => a.slug === slug);
+    const db = await getDatabase();
+    const collection = db.collection<Article>('articles');
     
-    if (articleIndex !== -1) {
-      db.articles[articleIndex].imageUrl = imageData.url;
-      db.articles[articleIndex].imageAlt = imageData.alt;
-      saveArticles(db);
-    }
+    await collection.updateOne(
+      { slug },
+      {
+        $set: {
+          imageUrl: imageData.url,
+          imageAlt: imageData.alt
+        }
+      }
+    );
 
     return NextResponse.json({
       success: true,

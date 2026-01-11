@@ -95,7 +95,7 @@ ${generateFaq ? `- FAQ: ${faqCount} pytania, KAŻDA odpowiedź MAX 30 słów` : 
 export async function generateArticleFromTopic(
   topicSlug: string
 ): Promise<Article> {
-  const topic = getTopicBySlug(topicSlug);
+  const topic = await getTopicBySlug(topicSlug);
   
   if (!topic) {
     throw new Error(`Topic not found: ${topicSlug}`);
@@ -109,7 +109,7 @@ export async function generateArticleFromTopic(
     throw new Error(`Topic already has a generated article`);
   }
   
-  updateTopicStatus(topic.id, 'generating');
+  await updateTopicStatus(topic.id, 'generating');
   
   const config = getSiteConfig();
   
@@ -149,14 +149,14 @@ export async function generateArticleFromTopic(
       publishedAt: new Date().toISOString()
     };
     
-    addArticle(article);
-    updateTopicStatus(topic.id, 'generated');
+    await addArticle(article);
+    await updateTopicStatus(topic.id, 'generated');
     
     return article;
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Unknown error';
     console.error(`Failed to generate article for topic ${topicSlug}:`, errorMsg);
-    updateTopicStatus(topic.id, 'error', errorMsg);
+    await updateTopicStatus(topic.id, 'error', errorMsg);
     throw error;
   }
 }
