@@ -64,30 +64,3 @@ export function isAuthenticated(request: NextRequest): boolean {
   
   return false;
 }
-
-/**
- * Checks if the request is coming from the same origin (internal request)
- */
-export function isInternalRequest(request: Request): boolean {
-  const referer = request.headers.get('referer');
-  const origin = request.headers.get('origin');
-  
-  if (!referer && !origin) {
-    // No referer or origin means it might be an external request
-    return false;
-  }
-  
-  // Check if referer or origin matches our domain
-  const config = getSiteConfig();
-  const domain = config.domain;
-  
-  if (referer && (referer.includes(domain) || referer.includes('localhost'))) {
-    return true;
-  }
-  
-  if (origin && (origin.includes(domain) || origin.includes('localhost'))) {
-    return true;
-  }
-  
-  return false;
-}

@@ -158,8 +158,9 @@ export default function AdminPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/topics');
-        if (response.ok) {
+        const response = await fetch('/api/auth/status');
+        const data = await response.json();
+        if (data.authenticated) {
           setIsAuthenticated(true);
         }
       } catch {
