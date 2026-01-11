@@ -57,7 +57,7 @@ Edit `site.config.json` to customize your portal:
   "admin": {
     "enabled": true,
     "pinHash": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
-    "apiKey": "your-secret-api-key-here"
+    "apiKey": "CHANGE-ME-BEFORE-DEPLOYMENT"
   }
 }
 ```
@@ -67,7 +67,7 @@ Edit `site.config.json` to customize your portal:
 The admin panel is protected by PIN authentication and API key protection:
 
 - **PIN Protection**: The admin interface requires a PIN to access. The default PIN is `1234` (hash: `03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4`)
-- **API Key Protection**: External API requests require an API key in the `x-api-key` header
+- **API Key Protection**: External API requests require an API key in the `x-api-key` header. The default is `CHANGE-ME-BEFORE-DEPLOYMENT`
 
 To change the PIN:
 1. Generate a SHA-256 hash of your desired PIN:

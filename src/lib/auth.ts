@@ -57,9 +57,10 @@ export function isAuthenticated(request: NextRequest): boolean {
     return true;
   }
   
-  // If no authentication is configured, allow access (backward compatibility)
+  // If no authentication is configured, deny access and warn
   if (!config.admin?.pinHash && !config.admin?.apiKey) {
-    return true;
+    console.warn('WARNING: No admin authentication configured (pinHash or apiKey). Access denied for security.');
+    return false;
   }
   
   return false;

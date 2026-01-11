@@ -26,9 +26,10 @@ In `site.config.json`:
 
 ### Default Credentials
 
-**Default PIN**: `1234`
+**Default PIN**: `1234`  
+**Default API Key**: `CHANGE-ME-BEFORE-DEPLOYMENT`
 
-**⚠️ WARNING**: Change the default PIN immediately! The default is only for initial setup and testing.
+**⚠️ WARNING**: Change both the default PIN and API key immediately! The defaults are only for initial setup and testing. Never deploy to production with these values.
 
 ### Changing the PIN
 
@@ -126,10 +127,9 @@ curl -X POST https://your-domain.com/api/articles/generate \
 
 If you discover a security vulnerability, please email the maintainers directly rather than opening a public issue.
 
-## Backward Compatibility
+## Security Configuration Requirements
 
-If no `pinHash` or `apiKey` is configured in `site.config.json`, the system will:
-- Deny access to the admin interface (PIN required)
-- Allow API access (backward compatible)
-
-To maintain security, always configure both PIN and API key.
+For security, both `pinHash` and `apiKey` must be configured in `site.config.json`:
+- If no PIN hash is configured, access to the admin interface will be denied
+- If no API key is configured, API access will be allowed (but this is not recommended for production)
+- A warning will be logged if authentication is not properly configured
