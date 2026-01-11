@@ -1,3 +1,6 @@
+
+import React from "react";
+import BrandingColorsProvider from "@/components/BrandingColorsProvider";
 import type { Metadata } from "next";
 import { Outfit, Syne } from "next/font/google";
 import "./globals.css";
@@ -27,12 +30,15 @@ export default function RootLayout({
 }>) {
   const config = getSiteConfig();
   
+
+
   return (
     <html lang={config.language} className="dark">
       <head>
         <link rel="icon" href={config.branding.faviconUrl} />
       </head>
       <body className={`${outfit.variable} ${syne.variable}`}>
+        <BrandingColorsProvider />
         {children}
       </body>
     </html>

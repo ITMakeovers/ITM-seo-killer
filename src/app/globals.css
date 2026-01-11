@@ -1,32 +1,33 @@
 @import "tailwindcss";
 
+
 :root {
-  /* Elegant Midnight Emerald Theme */
-  --bg-primary: #0c0f0e;
-  --bg-secondary: #111615;
+  /* Dynamic theme fallback, will be overwritten by BrandingColorsProvider if present */
+  --primary-color: #388e3c;
+  --secondary-color: #8bc34a;
+  --accent-color: #ffeb3b;
+
+  --bg-primary: var(--primary-color, #0c0f0e);
+  --bg-secondary: var(--secondary-color, #111615);
+  --accent-primary: var(--accent-color, #10b981);
+  /* Pozostałe kolory domyślne */
   --bg-tertiary: #161c1a;
   --bg-card: #131918;
   --bg-card-hover: #1a2120;
   --bg-elevated: #1e2624;
-  
   --text-primary: #e8ede9;
   --text-secondary: #9ca8a0;
   --text-muted: #5a6660;
   --text-accent: #6ee7b7;
-  
   --border-subtle: rgba(110, 231, 183, 0.08);
   --border-default: rgba(110, 231, 183, 0.15);
   --border-accent: rgba(110, 231, 183, 0.3);
-  
-  --accent-primary: #10b981;
   --accent-secondary: #6ee7b7;
   --accent-tertiary: #34d399;
   --accent-muted: rgba(16, 185, 129, 0.12);
   --accent-glow: rgba(110, 231, 183, 0.25);
-  
   --gold: #fbbf24;
   --gold-muted: rgba(251, 191, 36, 0.15);
-  
   /* Gradient magic */
   --gradient-hero: linear-gradient(135deg, 
     rgba(16, 185, 129, 0.15) 0%, 

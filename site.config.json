@@ -1,41 +1,58 @@
 {
-  "siteName": "Tech News Portal",
-  "domain": "localhost:3000",
+  "siteName": "Glebogryzarki.eu - Rankingi, TOP10, Opinie, Poradniki",
+  "domain": "glebogryzarki.eu",
   "language": "pl",
-  "niche": "Technologia i AI",
+  "niche": "Glebogryzarki, rankingi, poradniki, recenzje, top10, sprzęt ogrodniczy, porównania",
   "seedKeywords": [
-    "sztuczna inteligencja",
-    "programowanie",
-    "aplikacje mobilne",
-    "cyberbezpieczeństwo",
-    "cloud computing",
-    "web development",
-    "UI/UX design",
-    "blockchain",
-    "machine learning",
-    "internet rzeczy"
+    "glebogryzarka",
+    "top 10 glebogryzarek",
+    "ranking glebogryzarek",
+    "ranking",
+    "top 10",
+    "glebogryzarki ranking",
+    "najlepsza glebogryzarka",
+    "glebogryzarka opinie",
+    "glebogryzarka spalinowa",
+    "glebogryzarka elektryczna",
+    "glebogryzarka do ogrodu",
+    "glebogryzarka test",
+    "glebogryzarka porównanie",
+    "glebogryzarka top10",
+    "glebogryzarka ranking 2026",
+    "glebogryzarka do trawy",
+    "glebogryzarka do warzywnika",
+    "glebogryzarka do sadu",
+    "glebogryzarka z napędem",
+    "glebogryzarka z wałkiem",
+    "glebogryzarka do ciężkiej ziemi",
+    "glebogryzarka do małego ogrodu",
+    "glebogryzarka do dużego ogrodu",
+    "glebogryzarka opinie użytkowników"
   ],
   "layout": {
-  "homepage": "magazine",
-  "article": "standard",
-  "list": "grid"
-},
+    "homepage": "blog",
+    "article": "wide",
+    "list": "grid"
+  },
   "branding": {
-    "primaryColor": "#3b82f6",
-    "secondaryColor": "#60a5fa",
-    "accentColor": "#2563eb",
-    "backgroundColor": "#0a0a0b",
+    "primaryColor": "#0a2b16",
+    "secondaryColor": "#4ade80",
+    "accentColor": "#166534",
+    "backgroundColor": "#0b1a13",
     "logoUrl": "/logo.svg",
     "faviconUrl": "/favicon.ico"
   },
   "content": {
-    "articlesPerGeneration": 5,
-    "articleLength": "medium",
-    "writingStyle": "professional",
-    "generateFaq": false,
-    "faqQuestionsCount": 2,
-    "minInternalLinks": 2,
-    "maxInternalLinks": 4
+    "articlesPerGeneration": 7,
+    "articleLength": "long",
+    "writingStyle": "ekspercki",
+    "generateFaq": true,
+    "faqQuestionsCount": 5,
+    "minInternalLinks": 3,
+    "maxInternalLinks": 7,
+    "top10Enabled": true,
+    "rankingEnabled": true,
+    "poradnikiEnabled": true
   },
   "externalLinks": {
     "enabled": true,
@@ -43,34 +60,42 @@
       {
         "domain": "wikipedia.org",
         "anchors": [
-          "Dowiedz się więcej",
-          "Zobacz definicję",
-          "Czytaj dalej"
+          "Dowiedz się więcej o glebogryzarkach",
+          "Zobacz definicję glebogryzarki",
+          "Czytaj dalej na Wikipedii"
         ]
       },
       {
-        "domain": "github.com",
+        "domain": "ceneo.pl",
         "anchors": [
-          "Kod źródłowy",
-          "Repozytorium",
-          "Zobacz na GitHub"
+          "Porównaj ceny glebogryzarek",
+          "Ranking glebogryzarek",
+          "Opinie użytkowników"
+        ]
+      },
+      {
+        "domain": "youtube.com",
+        "anchors": [
+          "Zobacz test glebogryzarki",
+          "Recenzja wideo",
+          "Poradnik video"
         ]
       }
     ],
-    "maxExternalLinksPerArticle": 1
+    "maxExternalLinksPerArticle": 3
   },
   "seo": {
-    "defaultMetaTitle": "{title} - {siteName}",
-    "defaultMetaDescription": "Odkryj najnowsze informacje na temat: {topic}",
+    "defaultMetaTitle": "{title} | Ranking Glebogryzarek 2026, Opinie, Testy, Poradniki",
+    "defaultMetaDescription": "{description} | Sprawdź ranking, testy i opinie o glebogryzarkach. Porównania, TOP10, poradniki i wszystko o glebogryzarkach na jednym portalu!",
     "ogImageWidth": 1200,
     "ogImageHeight": 630,
     "twitterCard": "summary_large_image"
   },
   "generation": {
-    "batchSize": 3,
-    "autoGenerate": false,
+    "batchSize": 5,
+    "autoGenerate": true,
     "imageProvider": "unsplash",
-    "imageFallback": "placeholder"
+    "imageFallback": "glebogryzarka-placeholder"
   },
   "admin": {
     "enabled": true,

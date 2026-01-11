@@ -21,7 +21,7 @@ export function BlogLayout({ articles, siteName, niche }: BlogLayoutProps) {
           </div>
         </div>
         
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-display mb-6 text-gradient">
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-display mb-6">
           {siteName}
         </h1>
         
