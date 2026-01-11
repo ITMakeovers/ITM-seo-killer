@@ -154,43 +154,6 @@ export default function AdminPage() {
   const [generatingArticle, setGeneratingArticle] = useState<string | null>(null);
   const [message, setMessage] = useState('');
 
-  // Check authentication status on mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch('/api/auth/status');
-        const data = await response.json();
-        if (data.authenticated) {
-          setIsAuthenticated(true);
-        }
-      } catch {
-        setIsAuthenticated(false);
-      }
-    };
-    checkAuth();
-  }, []);
-
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-    loadTopics();
-  };
-
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      setIsAuthenticated(false);
-      setTopics([]);
-      setArticles([]);
-      setStats(null);
-    } catch {
-      setMessage('Błąd podczas wylogowania');
-    }
-  };
-
-  if (!isAuthenticated) {
-    return <AdminLogin onLogin={handleLogin} />;
-  }
-
   const loadTopics = async () => {
     setLoading(true);
     try {
@@ -217,9 +180,49 @@ export default function AdminPage() {
     }
   };
 
+  // Check authentication status on mount
   useEffect(() => {
-    loadTopics();
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/status');
+        const data = await response.json();
+        if (data.authenticated) {
+          setIsAuthenticated(true);
+        }
+      } catch {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
   }, []);
+
+  // Load topics when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadTopics();
+    }
+  }, [isAuthenticated]);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+    loadTopics();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      setIsAuthenticated(false);
+      setTopics([]);
+      setArticles([]);
+      setStats(null);
+    } catch {
+      setMessage('Błąd podczas wylogowania');
+    }
+  };
+
+  if (!isAuthenticated) {
+    return <AdminLogin onLogin={handleLogin} />;
+  }
 
   const handleGenerateTopics = async () => {
     setGenerating(true);
